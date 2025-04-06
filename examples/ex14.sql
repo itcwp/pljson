@@ -23,7 +23,7 @@ This software has been released under the MIT license:
 */
 /* Base64 binary support */
 
-set serveroutput on;
+
 declare
   obj pljson_list;
   binarydata blob := utl_raw.cast_to_raw('ABC');

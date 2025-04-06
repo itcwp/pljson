@@ -24,7 +24,7 @@ This software has been released under the MIT license:
 /* Base64 binary support */
 create table "JSON_BASE64_TEST" ( B_ID NUMBER NOT NULL, B_DATA BLOB, B_TYPE VARCHAR2(20), PRIMARY KEY (B_ID) )
 /
-set serveroutput on;
+
 declare
   obj pljson_list;
   binarydata blob := empty_blob();

@@ -21,7 +21,7 @@ This software has been released under the MIT license:
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 */
-set serveroutput on;
+
 declare
   ret pljson_list;
 begin

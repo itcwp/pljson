@@ -23,7 +23,7 @@ This software has been released under the MIT license:
 */
 /* Outputting unescaped values */
 
-set serveroutput on;
+
 declare
   obj pljson;
 begin

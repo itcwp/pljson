@@ -22,7 +22,7 @@ This software has been released under the MIT license:
   THE SOFTWARE.
 */
 /* Using the pretty-print with anydata */
-set serveroutput on;
+
 declare
   obj pljson;
 begin

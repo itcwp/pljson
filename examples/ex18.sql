@@ -23,7 +23,7 @@ This software has been released under the MIT license:
 */
 /* Using JSONML */
 
-set serveroutput on;
+
 declare
   arr pljson_list;
 begin

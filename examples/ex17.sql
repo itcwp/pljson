@@ -27,7 +27,7 @@ This software has been released under the MIT license:
                  index_of
                  get(indx)
 */
-set serveroutput on;
+
 declare
   obj pljson;
   indx number;

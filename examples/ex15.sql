@@ -23,7 +23,7 @@ This software has been released under the MIT license:
 */
 /* Conversion between pljson and pljson_list, featuring get_keys and get_values */
 
-set serveroutput on;
+
 declare
   l_obj pljson_list := pljson_list('[1,2,3]');
   j_obj pljson;

@@ -25,7 +25,7 @@ This software has been released under the MIT license:
   Using the JSON Path part of the JSON_EXT package
 */
 
-set serveroutput on;
+
 declare
   obj pljson := pljson(
 '{

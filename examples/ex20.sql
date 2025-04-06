@@ -1,5 +1,5 @@
 /* retrieving sql results as json clob */
-set serveroutput on;
+
 create or replace function ufx_plson_get_json_from_sql (i_sql in varchar2)
 return clob
 as

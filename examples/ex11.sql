@@ -25,7 +25,7 @@ This software has been released under the MIT license:
   Using the TO_CLOB method
 */
 
-set serveroutput on;
+
 
 declare
   obj pljson;
