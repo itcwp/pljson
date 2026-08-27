@@ -190,6 +190,7 @@ BEGIN
    Obj.Put('N2', Obj2);
    Obj.Print;
 
+p('********************************************');
    p('Extract data from json');
    Pair_Value := Obj.Get('N1');
    --what to do with pljson_element? get the content into the right type!
@@ -242,12 +243,12 @@ BEGIN
    -- element as anydata, inspect the type and convert it. Basically what we want to, is to extract an element without having to do any conversion. We know of
    -- more advanced implementations (http://goessner.net/articles/JsonPath/), but it lacks a formal grammar description and the use of regular expressions
    -- in the implementation is quite scary. The following examples explains how useful JSON Path is to PL/JSON.
-Dbms_Output.Put_Line('print the object');
+   Dbms_Output.Put_Line('print the object');
    Obj.Print;
    -- If it exists, we want to get the 3rd element of member b, but only if it is an integer. Otherwise we want the e value of the 3rd element of d (also int).
    -- The code should be secure (no exceptions)
    /* Old way - still valid though */
-   DECLARE
+/*   DECLARE
       Printme  NUMBER := NULL;
       Temp     Pljson_List;
       Tempdata Pljson_Element;
@@ -301,7 +302,7 @@ Dbms_Output.Put_Line('print the object');
       THEN
          Dbms_Output.Put_Line('Printme = ' || Printme);
       END IF;
-   END;
+   END;*/
 
    --now the JSON Path way:
    DECLARE
@@ -314,7 +315,7 @@ Dbms_Output.Put_Line('print the object');
       END IF;
       IF (Printme IS NOT NULL)
       THEN
-         Dbms_Output.Put_Line(Printme);
+         Dbms_Output.Put_Line('c.d[3].e= ' || Printme);
       END IF;
    END;
    --see the point???
@@ -330,7 +331,7 @@ Dbms_Output.Put_Line('print the object');
       -- Dbms_Output.Put_Line(Pljson_Ext.Get_String(Obj, ' a ')); --This line does not work!
       IF (Pljson_Ext.Get_Json_Element(Obj, 'c') IS NOT NULL)
       THEN
-         Dbms_Output.Put_Line('null');
+         Dbms_Output.Put_Line('c is null');
       END IF;
       Dbms_Output.Put_Line('d =' || Pljson_Ext.Get_Json(Obj, 'd').To_Char(FALSE));
       Dbms_Output.Put_Line('e =' || Pljson_Ext.Get_Json_List(Obj, 'e').To_Char);
@@ -338,9 +339,132 @@ Dbms_Output.Put_Line('print the object');
       Dbms_Output.Put_Line('g =' || Pljson_Ext.Get_Number(Obj, 'g'));
 
 END;
+ 
+--Example 8 split into 2 parts - this is part A
+DECLARE
+   Obj Pljson := Pljson('{
+  "a" : true,
+  "b" : [5,7,"3"],
+  "c" : {
+    "d" : [["array of array"], null, { "e": 7913 }]
+    , "f" : ["array of array", null, { "e": 7913 }]
+    , "g" : ["Single Value"]
+  }
+  , "e":[3,4,5]
+}');
+
+   Printme NUMBER := NULL;
+   string1 VARCHAR2(200) := NULL;
+BEGIN
+   Printme := Pljson_Ext.Get_Number(Obj, 'b[3]');
+   string1 := Pljson_Ext.Get_string(Obj, 'b[3]');
+   Dbms_Output.Put_Line('Printme = ' || Printme || '   string1 = ' || string1);
+   IF (Printme IS NULL)
+   THEN
+      Dbms_Output.Put_Line('Printme is NULL');
+      Printme := Pljson_Ext.Get_Number(Obj, 'c.d[3].e');
+      Dbms_Output.Put_Line('Printme value = ' || Printme);
+   END IF;
+   IF (Printme IS NOT NULL)
+   THEN
+      Dbms_Output.Put_Line('Printme is now not NULL');
+      Dbms_Output.Put_Line('c.d[3].e= ' || Printme);
+   END IF;
+ 
+   Dbms_Output.Put_Line('d =' || Pljson_Ext.Get_Json_list(Obj, 'c.d[1]').to_char);  
+   Dbms_Output.Put_Line('f =' || Pljson_Ext.Get_string(Obj, 'c.f[1]'));
+   Dbms_Output.Put_Line('g =' || Pljson_Ext.Get_string(Obj, 'c.g[1]'));
+END;
+  
+
+--Example 8 split into 2 parts - this is part B 
+DECLARE
+   Obj  Pljson := Pljson('{"a": "String", "b": false, "c": null, "d":{}, "e":[3,4,5],"f": "2009-09-01 00:00:00", "g":-789456}');
+   Obj2 Pljson := Pljson('{"a": "String", "b": false, "c": ["region_id"], "d":{
+      "region_code" : null,
+      "region" : null,
+      "region_id" : 0
+    }, "e":[3,4,5],"f": "2009-09-01 00:00:00", "g":-789456}');
+
+BEGIN
+   Obj.Print;
+   Dbms_Output.Put_Line('---------------------------------------------------');
+   Dbms_Output.Put_Line('a = ' || Pljson_Ext.Get_String(Obj, 'a'));
+   IF (Pljson_Ext.Get_Json_Element(Obj, 'c') IS NULL)
+   THEN
+      Dbms_Output.Put_Line('c is null');
+   ELSE
+      Dbms_Output.Put_Line('c is not null');
+   END IF;
+   Dbms_Output.Put_Line('d =' || Pljson_Ext.Get_Json(Obj,'d').To_Char(FALSE));
+   Dbms_Output.Put_Line('e =' || Pljson_Ext.Get_Json_List(Obj,'e').To_Char);
+   Dbms_Output.Put_Line('f =' || Pljson_Ext.Get_Date(Obj, 'f'));
+   Dbms_Output.Put_Line('g =' || Pljson_Ext.Get_Number(Obj, 'g'));
+
+   IF Pljson_Ext.Get_Bool(Obj, 'b')
+   THEN
+      Dbms_Output.Put_Line('True');
+   ELSE
+      Dbms_Output.Put_Line('False');
+   END IF;
+
+   IF (Pljson_Ext.Get_Json_Element(Obj2, 'c') IS NOT NULL)
+   THEN
+      Dbms_Output.Put_Line('c2 is not null');
+      Pljson_Ext.Get_Json_Element(Obj2, 'c').Print;
+   END IF;
+
+   Dbms_Output.Put_Line('d =' || Pljson_Ext.Get_Json(Obj2,'d').To_Char(FALSE));
+END;
 
 
+--Example not inexamples given. Lopp through Json list
+DECLARE
+   Json_Data2 Pljson;
+   Json_Data  Pljson := Pljson('{   "foo": "bar",   "list": [     {"key": "value1"},     {"key": "value2"}   ] }');
+   List_Value Pljson_List;
+BEGIN
+   List_Value := Pljson_Ext.Get_Json_List(Json_Data, 'list');
 
+   Dbms_Output.Put_Line('Count = ' || List_Value.Count);
+
+   FOR i IN 1 .. List_Value.Count
+   LOOP
+       json_data2 := pljson(list_value.get(i));
+       dbms_output.put_line('i = ' || i);
+      Pljson(List_Value.Get(i)).Get('key').Print;
+      -- dbms_output.put_line('key = ' || json_data2.get('key')); -- "key = value"
+   -- json_data2.get('key').print;
+   END LOOP;
+END;
+
+---Another loop
+DECLARE
+   Obj        Pljson := Pljson('{"info_any": {"middleName": "Wolfgang","lastName": "Munster","addresses": [{"city": "Corby","state": "CA","addressType": "home","street2": "my street","street1": "1313 Mockingbird Lane"},{"city": "Northampton","state": "CA","addressType": "business","street2": "Second street","street1": "123 Morgan Rd."}],"firstName": "Edward"}}');
+   List_Value Pljson_List;
+BEGIN
+
+   Obj := Pljson(Obj.Get('info_any'));
+
+   Dbms_Output.Put_Line('firstName->' || Pljson_Ext.Get_String(Obj, 'firstName'));
+   Dbms_Output.Put_Line('middleName->' || Pljson_Ext.Get_String(Obj, 'middleName'));
+   Dbms_Output.Put_Line('lastName->' || Pljson_Ext.Get_String(Obj, 'lastName'));
+   Dbms_Output.Put_Line('-------------------------------------------------');
+
+   List_Value := Pljson_List(Obj.Get('addresses'));
+
+   FOR i IN 1 .. List_Value.Count
+   LOOP
+   
+      Dbms_Output.Put_Line('addressType->' || Pljson_Ext.Get_String(Pljson(List_Value.Get(i)), 'addressType'));
+      Dbms_Output.Put_Line('street1->' || Pljson_Ext.Get_String(Pljson(List_Value.Get(i)), 'street1'));
+      Dbms_Output.Put_Line('street2->' || Pljson_Ext.Get_String(Pljson(List_Value.Get(i)), 'street2'));
+      Dbms_Output.Put_Line('city->' || Pljson_Ext.Get_String(Pljson(List_Value.Get(i)), 'city'));
+      Dbms_Output.Put_Line('state->' || Pljson_Ext.Get_String(Pljson(List_Value.Get(i)), 'state'));
+      Dbms_Output.Put_Line('-------------------------------------------------');
+   END LOOP;
+
+END;
 
 --Example 9
 /*
